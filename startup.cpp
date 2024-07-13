@@ -15,7 +15,23 @@ Startup::Startup(QString peerAddress, QObject *parent)
     , socket(new WebSocketIoDevice(webSocket, webSocket))
     , node(new QRemoteObjectHost(webSocket))
     , serial(new SerialPortActions(this))
-{}
+{
+    QObject::connect(webSocket, &QWebSocket::textMessageReceived, node,
+                     [&](QString message)
+                     {
+                         //Run host node after connection is up
+                         if (message == autodiscoveryMessage)
+                         {
+                             qDebug() << "Received autodiscovery message, starting host side connection";
+                             node->addHostSideConnection(socket);
+                         }
+                     }
+                     );
+    QObject::connect(webSocket, QOverload<QAbstractSocket::SocketError>::of(&QWebSocket::error),
+                     this, [=](QAbstractSocket::SocketError error)
+                     { qDebug() << this->metaObject()->className() << "startOverNetwok QWebSocket error:" << error; });
+
+}
 
 Startup::~Startup()
 {}
@@ -61,20 +77,6 @@ void Startup::startOverNetwok()
     node->setHeartbeatInterval(heartbeatInterval);
     //Enable remote object access
     node->enableRemoting(serial, remoteObjectName);
-    QObject::connect(webSocket, &QWebSocket::textMessageReceived, node,
-                     [&](QString message)
-                     {
-                         //Run host node after connection is up
-                         if (message == autodiscoveryMessage)
-                         {
-                             qDebug() << "Received autodiscovery message, starting host side connection";
-                             node->addHostSideConnection(socket);
-                         }
-                     }
-                     );
-    QObject::connect(webSocket, QOverload<QAbstractSocket::SocketError>::of(&QWebSocket::error),
-                     this, [=](QAbstractSocket::SocketError error)
-                     { qDebug() << this->metaObject()->className() << "startOverNetwok QWebSocket error:" << error; });
 
     webSocket->open("wss://" + peerAddress);
 }
