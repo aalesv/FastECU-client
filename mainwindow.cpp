@@ -17,6 +17,7 @@ QString now()
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
+    , startup(new Startup(this))
 {
     ui->setupUi(this);
     //Init config groupbox
@@ -69,7 +70,8 @@ void MainWindow::on_pushButton_connect_released()
     QString peer = peerAddress+":"+QString::number(peerPort);
     qDebug() << "Connecting to " << peer;
     log("Connecting to " + peer);
-    startup = new Startup(peer, this);
+    startup->setPeerAddress(peer);
+    startup->start();
 }
 
 void MainWindow::on_pushButton_disconnect_released()
@@ -77,7 +79,7 @@ void MainWindow::on_pushButton_disconnect_released()
     connectionStarted = false;
     update_ui();
     log("Closing connection to "+peerAddress+":"+QString::number(peerPort));
-    delete startup;
+    startup->stop();
 }
 
 void MainWindow::on_lineEdit_broker_address_textChanged(const QString &arg1)

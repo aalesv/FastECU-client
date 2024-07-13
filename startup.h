@@ -11,6 +11,7 @@ class Startup : public QObject
 {
     Q_OBJECT
 public:
+    explicit Startup(QObject *parent = nullptr);
     explicit Startup(QString peerAddress, QObject *parent = nullptr);
     ~Startup();
     const QString autodiscoveryMessage = "FastECU_PTP_Autodiscovery";
@@ -18,15 +19,21 @@ public:
     const QString remoteObjectName = "FastECU";
     const int heartbeatInterval = 1000;
 
+public slots:
+    void start();
+    void stop();
+    void setPeerAddress(QString address);
+    QString getPeerAddress();
+
 signals:
 private:
     QString peerAddress;
     QWebSocket *webSocket;
     WebSocketIoDevice *socket;
-    SerialPortActions serial;
-    QRemoteObjectHost node;
-    void startOverNetwok(void);
-    void startLocal(void);
+    QRemoteObjectHost *node;
+    SerialPortActions *serial;
+    void startOverNetwok();
+    void startLocal();
 };
 
 #endif // STARTUP_H
