@@ -503,7 +503,7 @@ bool SerialPortActions::reset_connection()
     return true;
 }
 
-QByteArray SerialPortActions::read_serial_data(uint32_t datalen, unsigned long timeout)
+QByteArray SerialPortActions::read_serial_data(uint32_t datalen, uint16_t timeout)
 {
     return serial_direct->read_serial_data(datalen, timeout);
 }

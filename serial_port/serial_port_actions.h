@@ -115,7 +115,7 @@ public:
 
     bool reset_connection(void) override ;
 
-    QByteArray read_serial_data(uint32_t datalen, unsigned long timeout) override ;
+    QByteArray read_serial_data(uint32_t datalen, uint16_t timeout) override ;
     QByteArray write_serial_data(QByteArray output) override ;
     QByteArray write_serial_data_echo_check(QByteArray output) override ;
 
