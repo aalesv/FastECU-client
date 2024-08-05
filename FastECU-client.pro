@@ -1,5 +1,7 @@
 QT       += core gui remoteobjects websockets serialport
-REPC_SOURCE = serial_port/serial_port_actions.rep
+REPC_SOURCE = \
+    serial_port/serial_port_actions.rep \
+    remote_utility/remote_utility.rep
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -12,6 +14,7 @@ CONFIG += c++17
 SOURCES += \
     main.cpp \
     mainwindow.cpp \
+    remote_utility/remote_utility.cpp \
     serial_port/serial_port_actions.cpp \
     serial_port/serial_port_actions_direct.cpp \
     serial_port/websocketiodevice.cpp \
@@ -19,6 +22,7 @@ SOURCES += \
 
 HEADERS += \
     mainwindow.h \
+    remote_utility/remote_utility.h \
     serial_port/serial_port_actions.h \
     serial_port/serial_port_actions_direct.h \
     serial_port/websocketiodevice.h \

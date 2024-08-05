@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QProgressBar>
 #include "startup.h"
 
 QT_BEGIN_NAMESPACE
@@ -28,6 +29,7 @@ private slots:
     void on_lineEdit_broker_port_textChanged(const QString &arg1);
     void update_ui(void);
     void resizeEvent(QResizeEvent *e);
+    void set_progressbar_value(int value);
 
 private:
     Ui::MainWindow *ui;
@@ -35,5 +37,6 @@ private:
     int peerPort = 33315;
     bool connectionStarted = false;
     Startup *startup;
+    QProgressBar *progress_bar;
 };
 #endif // MAINWINDOW_H

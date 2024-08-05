@@ -17,7 +17,8 @@ QString now()
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
-    , startup(new Startup(this))
+    , startup(new Startup("", this))
+    , progress_bar(new QProgressBar(this))
 {
     ui->setupUi(this);
     //Init config groupbox
@@ -26,6 +27,10 @@ MainWindow::MainWindow(QWidget *parent)
     ui->lineEdit_broker_port->setValidator( new QIntValidator(1, 65535, this) );
     ui->plainTextEdit_logs->setReadOnly(true);
     update_ui();
+    statusBar()->addWidget(progress_bar);
+    QObject::connect(startup, &Startup::log, this, &MainWindow::log);
+    QObject::connect(startup, &Startup::set_progressbar_value,
+                     this, &MainWindow::set_progressbar_value);
 }
 
 MainWindow::~MainWindow()
@@ -80,6 +85,7 @@ void MainWindow::on_pushButton_disconnect_released()
     update_ui();
     log("Closing connection to "+peerAddress+":"+QString::number(peerPort));
     startup->stop();
+    set_progressbar_value(0);
 }
 
 void MainWindow::on_lineEdit_broker_address_textChanged(const QString &arg1)
@@ -95,4 +101,9 @@ void MainWindow::on_lineEdit_broker_port_textChanged(const QString &arg1)
 void MainWindow::log(QString message)
 {
     ui->plainTextEdit_logs->appendPlainText(now()+" "+message);
+}
+
+void MainWindow::set_progressbar_value(int value)
+{
+    progress_bar->setValue(value);
 }

@@ -8,29 +8,49 @@ Startup::Startup(QObject *parent)
     : Startup("", parent)
 {}
 
-Startup::Startup(QString peerAddress, QObject *parent)
+Startup::Startup(QString peerAddress,
+                 QObject *parent)
     : QObject(parent)
     , peerAddress(peerAddress)
     , webSocket(new QWebSocket("",QWebSocketProtocol::VersionLatest,this))
-    , socket(new WebSocketIoDevice(webSocket, webSocket))
-    , node(new QRemoteObjectHost(webSocket))
+    , socket_serial(new WebSocketIoDevice(webSocket, webSocket))
+    , socket_utility(new WebSocketIoDevice(webSocket, webSocket))
+    , node_serial(new QRemoteObjectHost(webSocket))
+    , node_utility(new QRemoteObjectHost(webSocket))
     , serial(new SerialPortActions(this))
+    , utility(new RemoteUtility(this))
 {
-    QObject::connect(webSocket, &QWebSocket::textMessageReceived, node,
+    QObject::connect(webSocket, &QWebSocket::textMessageReceived, this,
                      [&](QString message)
                      {
                          //Run host node after connection is up
                          if (message == autodiscoveryMessage)
                          {
                              qDebug() << "Received autodiscovery message, starting host side connection";
-                             node->addHostSideConnection(socket);
+                             node_serial->addHostSideConnection(socket_serial);
+                             node_utility->addHostSideConnection(socket_utility);
                          }
                      }
                      );
     QObject::connect(webSocket, QOverload<QAbstractSocket::SocketError>::of(&QWebSocket::error),
                      this, [=](QAbstractSocket::SocketError error)
-                     { qDebug() << this->metaObject()->className() << "startOverNetwok QWebSocket error:" << error; });
-
+                     {
+                        qDebug() << this->metaObject()->className() << "startOverNetwok QWebSocket error:" << error;
+                        QString e = QVariant::fromValue(error).toString();
+                        emit log("Network error: " + e);
+                      });
+    QObject::connect(webSocket, &QWebSocket::disconnected,
+                     this, [=]()
+                     {
+                        QWebSocketProtocol::CloseCode code = this->webSocket->closeCode();
+                        QString reason = this->webSocket->closeReason();
+                        qDebug() << "webSocket disconnected: " << code << reason;
+                        emit log("Disconnected from "+this->peerAddress+" "+QString::number(code)+" "+reason);
+                     });
+    QObject::connect(utility, &RemoteUtility::signal_send_log_window_message,
+                     this, &Startup::log);
+    QObject::connect(utility, &RemoteUtility::signal_set_progressbar_value,
+                     this, &Startup::set_progressbar_value);
 }
 
 Startup::~Startup()
@@ -62,8 +82,10 @@ void Startup::start()
 void Startup::stop()
 {
     qDebug() << "Disconnecting from" << peerAddress;
-    node->disableRemoting(serial);
-    webSocket->close(QWebSocketProtocol::CloseCodeGoingAway, "User request");
+    node_serial->disableRemoting(serial);
+    node_utility->disableRemoting(utility);
+    if (webSocket->isValid())
+        webSocket->close();
 }
 
 void Startup::startOverNetwok()
@@ -73,10 +95,15 @@ void Startup::startOverNetwok()
     sslConfiguration.setPeerVerifyMode(QSslSocket::VerifyNone);
     webSocket->setSslConfiguration(sslConfiguration);
     //Mandatory
-    node->setHostUrl(QUrl(nodeUrl), QRemoteObjectHost::AllowExternalRegistration);
-    node->setHeartbeatInterval(heartbeatInterval);
+    node_serial->setHostUrl(QUrl(nodeUrlSerial), QRemoteObjectHost::AllowExternalRegistration);
+    node_serial->setHeartbeatInterval(heartbeatIntervalSerial);
     //Enable remote object access
-    node->enableRemoting(serial, remoteObjectName);
+    node_serial->enableRemoting(serial, remoteObjectNameSerial);
+    //Mandatory
+    node_utility->setHostUrl(QUrl(nodeUrlUtility), QRemoteObjectHost::AllowExternalRegistration);
+    node_utility->setHeartbeatInterval(heartbeatIntervalUtility);
+    //Enable remote object access
+    node_utility->enableRemoting(utility, remoteObjectNameUtility);
 
     webSocket->open("wss://" + peerAddress);
 }
@@ -84,7 +111,11 @@ void Startup::startOverNetwok()
 void Startup::startLocal()
 {
     qDebug() << "starting local connection";
-    node->setHostUrl(QUrl(peerAddress),
+    node_serial->setHostUrl(QUrl(peerAddress),
                     QRemoteObjectHost::BuiltInSchemasOnly);
-    node->enableRemoting(serial, remoteObjectName);
+    node_serial->enableRemoting(serial, remoteObjectNameSerial);
+
+    node_utility->setHostUrl(QUrl(peerAddress+remoteObjectNameUtility),
+                            QRemoteObjectHost::BuiltInSchemasOnly);
+    node_utility->enableRemoting(utility, remoteObjectNameUtility);
 }

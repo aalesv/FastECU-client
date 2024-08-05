@@ -6,18 +6,23 @@
 #include <QWebSocket>
 #include "websocketiodevice.h"
 #include "serial_port/serial_port_actions.h"
+#include "remote_utility/remote_utility.h"
 
 class Startup : public QObject
 {
     Q_OBJECT
 public:
     explicit Startup(QObject *parent = nullptr);
-    explicit Startup(QString peerAddress, QObject *parent = nullptr);
+    explicit Startup(QString peerAddress,
+                     QObject *parent = nullptr);
     ~Startup();
     const QString autodiscoveryMessage = "FastECU_PTP_Autodiscovery";
-    const QString nodeUrl = "FastECU_node_url";
-    const QString remoteObjectName = "FastECU";
-    const int heartbeatInterval = 1000;
+    const QString nodeUrlSerial = "FastECU_node_url";
+    const QString nodeUrlUtility = "FastECU_Utility_node_url";
+    const QString remoteObjectNameSerial = "FastECU";
+    const QString remoteObjectNameUtility = "FastECU_Utility";
+    const int heartbeatIntervalSerial = 1000;
+    const int heartbeatIntervalUtility = heartbeatIntervalSerial * 5;
 
 public slots:
     void start();
@@ -26,12 +31,18 @@ public slots:
     QString getPeerAddress();
 
 signals:
+    void log(QString message);
+    void set_progressbar_value(int value);
+
 private:
     QString peerAddress;
     QWebSocket *webSocket;
-    WebSocketIoDevice *socket;
-    QRemoteObjectHost *node;
+    WebSocketIoDevice *socket_serial;
+    WebSocketIoDevice *socket_utility;
+    QRemoteObjectHost *node_serial;
+    QRemoteObjectHost *node_utility;
     SerialPortActions *serial;
+    RemoteUtility *utility;
     void startOverNetwok();
     void startLocal();
 };
