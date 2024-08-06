@@ -21,6 +21,7 @@ public:
 
 public slots:
     void log(QString message);
+    void aboutToQuit();
 
 private slots:
     void on_pushButton_connect_released();

@@ -107,3 +107,12 @@ void MainWindow::set_progressbar_value(int value)
 {
     progress_bar->setValue(value);
 }
+
+void MainWindow::aboutToQuit()
+{
+    //Do not quit immediately
+    on_pushButton_disconnect_released();
+    QTime dieTime= QTime::currentTime().addSecs(5);
+    while (QTime::currentTime() < dieTime)
+        QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+}
