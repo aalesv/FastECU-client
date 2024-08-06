@@ -29,7 +29,6 @@ private slots:
     void on_lineEdit_broker_address_textChanged(const QString &arg1);
     void on_lineEdit_broker_port_textChanged(const QString &arg1);
     void update_ui(void);
-    void resizeEvent(QResizeEvent *e);
     void set_progressbar_value(int value);
 
 private:
@@ -38,6 +37,5 @@ private:
     int peerPort = 33315;
     bool connectionStarted = false;
     Startup *startup;
-    //QProgressBar *progress_bar;
 };
 #endif // MAINWINDOW_H
