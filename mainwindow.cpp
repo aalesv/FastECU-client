@@ -18,7 +18,7 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
     , startup(new Startup("", this))
-    , progress_bar(new QProgressBar(this))
+//    , progress_bar(new QProgressBar(this))
 {
     ui->setupUi(this);
     //Init config groupbox
@@ -27,7 +27,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->lineEdit_broker_port->setValidator( new QIntValidator(1, 65535, this) );
     ui->plainTextEdit_logs->setReadOnly(true);
     update_ui();
-    statusBar()->addWidget(progress_bar);
+    //statusBar()->addWidget(progress_bar);
     QObject::connect(startup, &Startup::log, this, &MainWindow::log);
     QObject::connect(startup, &Startup::set_progressbar_value,
                      this, &MainWindow::set_progressbar_value);
@@ -61,10 +61,10 @@ void MainWindow::resizeEvent(QResizeEvent *e)
     size = ui->plainTextEdit_logs->size();
     size.setWidth(width - 2*margin);
 
-    int height = e->size().height();
-    margin = ui->plainTextEdit_logs->geometry().y();
+    //int height = e->size().height();
+    //margin = ui->plainTextEdit_logs->geometry().y();
     //Height of status bar is about 20 by default
-    size.setHeight(height - margin - 40);
+    //size.setHeight(height - margin - 40);
     ui->plainTextEdit_logs->resize(size);
 }
 
@@ -105,7 +105,7 @@ void MainWindow::log(QString message)
 
 void MainWindow::set_progressbar_value(int value)
 {
-    progress_bar->setValue(value);
+    ui->progressBar->setValue(value);
 }
 
 void MainWindow::aboutToQuit()

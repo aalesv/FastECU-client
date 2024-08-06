@@ -38,6 +38,6 @@ private:
     int peerPort = 33315;
     bool connectionStarted = false;
     Startup *startup;
-    QProgressBar *progress_bar;
+    //QProgressBar *progress_bar;
 };
 #endif // MAINWINDOW_H
