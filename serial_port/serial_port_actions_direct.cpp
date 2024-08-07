@@ -287,6 +287,7 @@ QStringList SerialPortActionsDirect::check_serial_ports()
 {
     const auto serialPortsInfo = QSerialPortInfo::availablePorts();
     QStringList serial_ports;
+    QString j2534DllName = "j2534.dll";
 
     serialPortAvailable = false;
 
