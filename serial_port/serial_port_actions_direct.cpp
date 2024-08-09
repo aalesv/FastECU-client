@@ -302,7 +302,7 @@ QStringList SerialPortActionsDirect::check_serial_ports()
     j2534->setDllName(j2534DllName.toLocal8Bit().data());
     if (!j2534->init())
     {
-        qDebug() << "j2534.dll not found, testing for op20pt32.dll";
+        qDebug() << j2534DllName + " not found, testing for op20pt32.dll";
         j2534DllName.clear();
         j2534DllName.append("op20pt32.dll");
         j2534->setDllName(j2534DllName.toLocal8Bit().data());
@@ -312,8 +312,12 @@ QStringList SerialPortActionsDirect::check_serial_ports()
         qDebug() << "Found " + j2534DllName;
         if (!j2534->PassThruOpen(NULL, &devID))
         {
+            qDebug() << "Check ports: Port open succesful with ID " << devID;
             serial_ports.append("J2534 - API DLL");
         }
+        else
+            qDebug() << "Check ports: Port open failed with ID " << devID;
+
     }
     else
         qDebug() << "No j2534 dll´s found";
@@ -416,9 +420,6 @@ QString SerialPortActionsDirect::open_serial_port()
         }
     }
 
-    //if (J2534_init_ok)
-    //    ssm_init();
-
     return openedSerialPort;
 }
 
@@ -453,10 +454,6 @@ void SerialPortActionsDirect::close_j2534_serial_port()
     J2534_init_ok = false;
     j2534->J2534_init_ok = false;
     openedSerialPort.clear();
-    //j2534->close();
-    //J2534 *j2534;
-    delete j2534;
-    j2534 = new J2534;
 }
 
 QByteArray SerialPortActionsDirect::read_serial_data(uint32_t datalen, uint16_t timeout)
