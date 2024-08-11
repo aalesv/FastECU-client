@@ -26,7 +26,8 @@ MainWindow::MainWindow(QWidget *parent)
     ui->lineEdit_broker_port->setValidator( new QIntValidator(1, 65535, this) );
     ui->plainTextEdit_logs->setReadOnly(true);
 
-    qDebug() << "Is Aero?" << isAeroEnabled();
+    if(!isAeroEnabled())
+        ui->progressBar->setAlignment(Qt::AlignRight);
 
     update_ui();
     //statusBar()->addWidget(progress_bar);
