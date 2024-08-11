@@ -5,6 +5,12 @@
 #include <QProgressBar>
 #include "startup.h"
 
+#if defined(Q_OS_WIN32)
+#include <windows.h>
+#include <setupapi.h>
+
+#endif
+
 QT_BEGIN_NAMESPACE
 namespace Ui {
 class MainWindow;
@@ -37,5 +43,7 @@ private:
     int peerPort = 33315;
     bool connectionStarted = false;
     Startup *startup;
+
+    bool isAeroEnabled();
 };
 #endif // MAINWINDOW_H
