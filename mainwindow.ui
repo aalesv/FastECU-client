@@ -87,9 +87,6 @@
       <property name="value">
        <number>0</number>
       </property>
-      <property name="alignment">
-       <set>Qt::AlignmentFlag::AlignCenter</set>
-      </property>
       <property name="textVisible">
        <bool>true</bool>
       </property>

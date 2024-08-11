@@ -26,9 +26,6 @@ MainWindow::MainWindow(QWidget *parent)
     ui->lineEdit_broker_port->setValidator( new QIntValidator(1, 65535, this) );
     ui->plainTextEdit_logs->setReadOnly(true);
 
-    if(!isAeroEnabled())
-        ui->progressBar->setAlignment(Qt::AlignRight);
-
     update_ui();
     //statusBar()->addWidget(progress_bar);
     QObject::connect(startup, &Startup::log, this, &MainWindow::log);
@@ -47,20 +44,6 @@ void MainWindow::update_ui(void)
     ui->lineEdit_broker_port->setDisabled(connectionStarted);
     ui->pushButton_connect->setDisabled(connectionStarted);
     ui->pushButton_disconnect->setEnabled(connectionStarted);
-}
-
-// true == Aero theme, false == Classic theme
-bool MainWindow::isAeroEnabled()
-{
-    HMODULE library = LoadLibrary(L"dwmapi.dll");
-    bool result = false;
-    if (library) {
-        BOOL enabled = false;
-        HRESULT (WINAPI *pFn)(BOOL *enabled) = (HRESULT (WINAPI *)(BOOL *enabled))(GetProcAddress(library, "DwmIsCompositionEnabled"));
-        result = SUCCEEDED(pFn(&enabled)) && enabled;
-        FreeLibrary(library);
-    }
-    return result;
 }
 
 void MainWindow::on_pushButton_connect_released()

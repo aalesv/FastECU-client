@@ -44,6 +44,5 @@ private:
     bool connectionStarted = false;
     Startup *startup;
 
-    bool isAeroEnabled();
 };
 #endif // MAINWINDOW_H
