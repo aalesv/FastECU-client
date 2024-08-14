@@ -291,71 +291,142 @@ QStringList SerialPortActionsDirect::check_serial_ports()
 
     serialPortAvailable = false;
 
-    //ui->serial_ports->clear();
     for (const QSerialPortInfo &serialPortInfo : serialPortsInfo){
-        //ui->serial_ports->addItem(serialPortPrefix + serialPortInfo.portName());
-        serial_ports.append("remote:" + serialPortInfo.portName() + " - " + serialPortInfo.description());
-        //qDebug() << "Serial port name:" << serialPortInfo.portName() << serialPortInfo.description();
+        serial_ports.append(serialPortInfo.portName() + " - " + serialPortInfo.description());
+        qDebug() << "Serial port name:" << serialPortInfo.portName() << serialPortInfo.description();
     }
-#if defined(_WIN32) || defined(WIN32) || defined (_WIN64) || defined (WIN64)
-    qDebug() << "Testing for " + j2534DllName;
-    j2534->setDllName(j2534DllName.toLocal8Bit().data());
-    if (!j2534->init())
-    {
-        qDebug() << j2534DllName + " not found, testing for op20pt32.dll";
-        j2534DllName.clear();
-        j2534DllName.append("op20pt32.dll");
-        j2534->setDllName(j2534DllName.toLocal8Bit().data());
-    }
-    if (j2534->init())
-    {
-        qDebug() << "Found " + j2534DllName;
-        if (!j2534->PassThruOpen(NULL, &devID))
-        {
-            qDebug() << "Check ports: Port open succesful with ID " << devID;
-            serial_ports.append("J2534 - API DLL");
-        }
-        else
-            qDebug() << "Check ports: Port open failed with ID " << devID;
-
-    }
-    else
-        qDebug() << "No j2534 dll´s found";
-
-    j2534->PassThruClose(devID);
-#endif
-
     std::sort(serial_ports.begin(), serial_ports.end(), std::less<QString>());
+
+#if defined(_WIN32) || defined(WIN32) || defined (_WIN64) || defined (WIN64)
+    QStringList j2534_interfaces;
+    installed_drivers = getAllJ2534DriversNames();
+    for (const QString installed_vendor : installed_drivers.keys())
+    {
+        j2534_interfaces.append(installed_vendor);
+    }
+    std::sort(j2534_interfaces.begin(), j2534_interfaces.end(), std::less<QString>());
+    serial_ports.append(j2534_interfaces);
+#endif
 
     return serial_ports;
 }
 
+#if defined(_WIN32) || defined(WIN32) || defined (_WIN64) || defined (WIN64)
+#if defined(_WIN32) || defined(WIN32)
+#define REGISTRY_FORMAT QSettings::Registry32Format
+#else
+#define REGISTRY_FORMAT QSettings::Registry64Format
+#endif
+
+//Find first connected device
+//TODO find all devices
+QStringList SerialPortActionsDirect::check_j2534_devices(QMap<QString, QString> installed_drivers)
+{
+    bool j2534DeviceFound = false;
+    QStringList j2534_devices;
+    int driver_count = 0;
+    for (const QString vendor : installed_drivers.keys())
+    {
+        driver_count++;
+        j2534->disable();
+        //close_j2534_serial_port();
+        QString j2534DllName = installed_drivers[vendor];
+        qDebug() << "Testing for " + j2534DllName;
+        j2534->setDllName(j2534DllName.toLocal8Bit().data());
+        if (j2534->init())
+        {
+            qDebug() << j2534DllName << "init successfull";
+            //0 means no error
+            if (!j2534->PassThruOpen(NULL, &devID))
+            {
+                qDebug() << "Successfully opened" << devID << vendor << j2534DllName;
+                j2534_devices.append(vendor);
+                j2534DeviceFound = true;
+                j2534->PassThruClose(devID);
+            }
+            else
+                qDebug() << devID << vendor << "device not connected";
+        }
+        else
+            qDebug() << j2534DllName << "not found";
+        if (j2534DeviceFound)
+            break;
+    }
+    qDebug() << "Tested installed drivers:" << driver_count;
+
+    return j2534_devices;
+}
+
+QMap<QString, QString> SerialPortActionsDirect::getAllJ2534DriversNames()
+{
+    QSettings *registry = new QSettings("HKEY_LOCAL_MACHINE\\SOFTWARE\\PassThruSupport.04.04", REGISTRY_FORMAT);
+    QMap<QString, QString> drivers_map;
+    for (const QString &i : registry->childGroups())
+    {
+        QString vendor = i;
+        //qDebug() << "J2534 Drivers:" << vendor;
+        vendor.replace("\\", "/");
+        QString dllName = registry->value(i+"/FunctionLibrary").toString();
+        drivers_map[vendor] = dllName;
+    }
+    qDebug() << "Found installed drivers:" << drivers_map;
+    return drivers_map;
+}
+#endif
+
 QString SerialPortActionsDirect::open_serial_port()
 {
     //qDebug() << "Serial port =" << serial_port_list;
-    QString serial_port_text = serial_port_list.at(1);
+    //QString serial_port_text = serial_port_list.at(1);
 #ifdef Q_OS_LINUX
     serial_port = serial_port_prefix_linux + serial_port_list.at(0);
+    serial_port = serial_port.split(" - ").at(0);
 #endif
 #if defined(_WIN32) || defined(WIN32) || defined (_WIN64) || defined (WIN64)
     serial_port = serial_port_prefix_win + serial_port_list.at(0);
 #endif
+    qDebug() << "Interface:" << serial_port;
 
-    //    if (serial_port_text == "OpenPort 2.0")
-    if (serial_port_text != "")
-
+    if (!serial_port.isEmpty())
     {
         close_serial_port();
         use_openport2_adapter = true;
 
+//QMap<QString, QString> user_j2534_drivers; // Local drivers in software folder
+#if defined(_WIN32) || defined(WIN32) || defined (_WIN64) || defined (WIN64)
+        QString localDllName;
+        QString installedDllName;
+
+        QStringList dllName = installed_drivers.value(serial_port).split("\\");
+        localDllName = dllName.at(dllName.count() - 1);
+        installedDllName = installed_drivers.value(serial_port);
+        qDebug() << "Local DLL Name:" << localDllName;
+        qDebug() << "Installed DLL Name:" << installedDllName;
+
+        QMap<QString, QString> user_j2534_drivers;
+
+        qDebug() << "Opening device:" << serial_port;
+        QStringList j2534_driver;
+        user_j2534_drivers[serial_port] = localDllName;
+        j2534_driver = check_j2534_devices(user_j2534_drivers);
+        user_j2534_drivers[serial_port] = installedDllName;
+        if (j2534_driver.isEmpty())
+            j2534_driver = check_j2534_devices(user_j2534_drivers);
+        if (!j2534_driver.isEmpty())
+            j2534->setDllName(j2534_driver.at(0).toLocal8Bit().data());
+        else
+            qDebug() << "Initializing interface failed!";
+#endif
         if (!J2534_init_ok)
         {
             long result;
 
+            qDebug() << "Testing interface, please wait...";
             result = init_j2534_connection();
 
             if (result == STATUS_SUCCESS)
             {
+                qDebug() << "Interface opened succesfully!";
                 J2534_init_ok = true;
                 j2534->J2534_init_ok = true;
             }
@@ -363,6 +434,8 @@ QString SerialPortActionsDirect::open_serial_port()
         }
         if (!j2534->is_serial_port_open())
         {
+            qDebug() << "Failed to open interface!";
+            use_openport2_adapter = false;
             close_j2534_serial_port();
         }
     }
@@ -371,10 +444,12 @@ QString SerialPortActionsDirect::open_serial_port()
         use_openport2_adapter = false;
         close_j2534_serial_port();
     }
+
     if (!use_openport2_adapter && openedSerialPort != serial_port)
     {
         close_serial_port();
 
+        serial_port = serial_port.split(" - ").at(0);
 #ifdef Q_OS_LINUX
             //serial_port = serial_port_prefix_linux + serial_port;
 #endif
@@ -399,7 +474,7 @@ QString SerialPortActionsDirect::open_serial_port()
                 openedSerialPort = serial_port;
                 //connect(serial, SIGNAL(readyRead()), this, SLOT(ReadSerialDataSlot()), Qt::DirectConnection);
                 qRegisterMetaType<QSerialPort::SerialPortError>();
-                connect(serial, SIGNAL(error(QSerialPort::SerialPortError)), this, SLOT(handle_error(QSerialPort::SerialPortError)));
+                connect(serial, SIGNAL(errorOccurred(QSerialPort::SerialPortError)), this, SLOT(handle_error(QSerialPort::SerialPortError)));
 
                 //send_log_window_message("Serial port '" + serialPort + "' is open at baudrate " + serialPortBaudRate, true, true);
                 //qDebug() << "Serial port '" + serial_port + "' is open at baudrate " + serial_port_baudrate;
@@ -407,14 +482,14 @@ QString SerialPortActionsDirect::open_serial_port()
             }
             else
             {
-                //SendLogWindowMessage("Couldn't open serial port '" + serialPort + "'", true, true);
+                //sendLogWindowMessage("Couldn't open serial port '" + serialPort + "'", true, true);
                 //qDebug() << "Couldn't open serial port '" + serial_port + "'";
                 return NULL;
             }
 
         }
         else{
-            //SendLogWindowMessage("Serial port '" + serialPort + "' is already opened", true, true);
+            //sendLogWindowMessage("Serial port '" + serialPort + "' is already opened", true, true);
             //qDebug() << "Serial port '" + serial_port + "' is already opened";
             return openedSerialPort;
         }
@@ -454,6 +529,11 @@ void SerialPortActionsDirect::close_j2534_serial_port()
     J2534_init_ok = false;
     j2534->J2534_init_ok = false;
     openedSerialPort.clear();
+    char dllName[256];
+    j2534->getDllName(dllName);
+    delete j2534;
+    j2534 = new J2534();
+    j2534->setDllName(dllName);
 }
 
 QByteArray SerialPortActionsDirect::read_serial_data(uint32_t datalen, uint16_t timeout)
