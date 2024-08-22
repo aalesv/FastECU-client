@@ -345,6 +345,17 @@ bool SerialPortActions::set_can_speed(QString value)
     return true;
 }
 
+uint8_t SerialPortActions::get_serial_port_parity(void)
+{
+    return serial_direct->serial_port_parity;
+}
+
+bool SerialPortActions::set_serial_port_parity(uint8_t parity)
+{
+    serial_direct->serial_port_parity = parity;
+    return true;
+}
+
 QString SerialPortActions::get_serial_port_baudrate()
 {
     return serial_direct->serial_port_baudrate;

@@ -389,7 +389,8 @@ QString SerialPortActionsDirect::open_serial_port()
 
     if (!serial_port.isEmpty())
     {
-        close_serial_port();
+        reset_connection();
+        //close_serial_port();
         use_openport2_adapter = true;
 
 //QMap<QString, QString> user_j2534_drivers; // Local drivers in software folder
@@ -421,7 +422,7 @@ QString SerialPortActionsDirect::open_serial_port()
         {
             long result;
 
-            qDebug() << "Testing interface, please wait...";
+            qDebug() << "Testing j2534 interface, please wait...";
             result = init_j2534_connection();
 
             if (result == STATUS_SUCCESS)
@@ -447,7 +448,8 @@ QString SerialPortActionsDirect::open_serial_port()
 
     if (!use_openport2_adapter && openedSerialPort != serial_port)
     {
-        close_serial_port();
+        qDebug() << "Testing serial interface, please wait...";
+        //close_serial_port();
 
         serial_port = serial_port.split(" - ").at(0);
 #ifdef Q_OS_LINUX
@@ -462,7 +464,7 @@ QString SerialPortActionsDirect::open_serial_port()
             serial->setBaudRate(serial_port_baudrate.toDouble());
             serial->setDataBits(QSerialPort::Data8);
             serial->setStopBits(QSerialPort::OneStop);
-            serial->setParity(QSerialPort::NoParity);
+            serial->setParity((QSerialPort::Parity)serial_port_parity);
             serial->setFlowControl(QSerialPort::NoFlowControl);
 
             if (serial->open(QIODevice::ReadWrite)){
@@ -921,6 +923,9 @@ int SerialPortActionsDirect::init_j2534_connection()
     // Open J2534 connection
     if (j2534->PassThruOpen(NULL, &devID))
     {
+#ifdef Q_OS_LINUX
+        j2534->close_serial_port();
+#endif
         reportJ2534Error();
         return STATUS_ERROR;
     }
