@@ -391,9 +391,9 @@ QString SerialPortActionsDirect::open_serial_port()
     {
         reset_connection();
         //close_serial_port();
-        use_openport2_adapter = true;
+        //use_openport2_adapter = true;
 
-//QMap<QString, QString> user_j2534_drivers; // Local drivers in software folder
+        //QMap<QString, QString> user_j2534_drivers; // Local drivers in software folder
 #if defined(_WIN32) || defined(WIN32) || defined (_WIN64) || defined (WIN64)
         QString localDllName;
         QString installedDllName;
@@ -418,34 +418,26 @@ QString SerialPortActionsDirect::open_serial_port()
         else
             qDebug() << "Initializing interface failed!";
 #endif
-        if (!J2534_init_ok)
+        long result;
+
+        qDebug() << "Testing j2534 interface, please wait...";
+        result = init_j2534_connection();
+
+        if (result == STATUS_SUCCESS)
         {
-            long result;
-
-            qDebug() << "Testing j2534 interface, please wait...";
-            result = init_j2534_connection();
-
-            if (result == STATUS_SUCCESS)
-            {
-                qDebug() << "Interface opened succesfully!";
-                J2534_init_ok = true;
-                j2534->J2534_init_ok = true;
-            }
+            qDebug() << "Interface opened succesfully!";
+            use_openport2_adapter = true;
+            J2534_init_ok = true;
+            j2534->J2534_init_ok = true;
             openedSerialPort = serial_port;
         }
-        if (!j2534->is_serial_port_open())
+        else
         {
             qDebug() << "Failed to open interface!";
             use_openport2_adapter = false;
-            close_j2534_serial_port();
+            reset_connection();
         }
     }
-    else if (J2534_init_ok)
-    {
-        use_openport2_adapter = false;
-        close_j2534_serial_port();
-    }
-
     if (!use_openport2_adapter && openedSerialPort != serial_port)
     {
         qDebug() << "Testing serial interface, please wait...";
