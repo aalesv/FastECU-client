@@ -23,6 +23,7 @@ SOURCES += \
 HEADERS += \
     mainwindow.h \
     remote_utility/remote_utility.h \
+    serial_port/J2534_tactrix_linux.h \
     serial_port/serial_port_actions.h \
     serial_port/serial_port_actions_direct.h \
     serial_port/websocketiodevice.h \

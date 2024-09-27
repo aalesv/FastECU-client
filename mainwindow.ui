@@ -36,7 +36,7 @@
        <string>Broker connection parameters</string>
       </property>
       <property name="alignment">
-       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+       <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignVCenter</set>
       </property>
       <layout class="QHBoxLayout" name="horizontalLayout">
        <item>
@@ -87,8 +87,8 @@
       <property name="value">
        <number>0</number>
       </property>
-      <property name="alignment">
-       <set>Qt::AlignJustify|Qt::AlignVCenter</set>
+      <property name="textVisible">
+       <bool>true</bool>
       </property>
      </widget>
     </item>
@@ -103,7 +103,7 @@
      <x>0</x>
      <y>0</y>
      <width>800</width>
-     <height>23</height>
+     <height>22</height>
     </rect>
    </property>
    <property name="sizePolicy">

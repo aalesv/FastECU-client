@@ -11,7 +11,7 @@
 
 #include <stdint.h>
 
-#include "J2534_tactrix_win.h"
+#include "J2534_tactrix_linux.h"
 
 class J2534 : public QWidget
 {
@@ -30,6 +30,9 @@ public:
     bool is_serial_port_open();
 
     bool init() { return true; };
+    void setDllName(const char* name) {}; // For Win/Linux compatibility only
+    void getDllName(char* name) {}; // For Win/Linux compatibility only
+    void debug(bool enable) { debugMode = enable; };
 
     long PassThruOpen(const void *pName, unsigned long *pDeviceID);
     long PassThruClose(unsigned long DeviceID);
@@ -55,6 +58,8 @@ public:
     uint32_t parse_ts(const char *data);
 
 private:
+    bool debugMode;
+
     QString opened_serial_port;
     QString serial_port_baudrate = "4800";
 

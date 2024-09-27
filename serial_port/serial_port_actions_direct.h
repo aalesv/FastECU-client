@@ -12,6 +12,7 @@
 #include <QTime>
 #include <QTimer>
 #include <QWidget>
+#include <QSettings>
 
 #include <stdint.h>
 #include <stdio.h>
@@ -52,6 +53,8 @@ public:
     int dataTerminalEnabled = 0;
     int dataTerminalDisabled = 1;
 
+    int echo_check_timout = 5000;
+
     uint8_t iso14230_startbyte = 0;
     uint8_t iso14230_tester_id = 0;
     uint8_t iso14230_target_id = 0;
@@ -74,6 +77,7 @@ public:
 
     QString can_speed = "500000";
 
+    uint8_t serial_port_parity = (uint8_t)QSerialPort::NoParity;
     QString serial_port_baudrate = "4800";
     QString serial_port_linux = "/dev/ttyUSB0";
     QString serial_port_windows = "COM67";
@@ -185,6 +189,9 @@ private:
 
     int line_end_check_1_toggled(int state);
     int line_end_check_2_toggled(int state);
+#if defined(Q_OS_WIN32)
+    QMap<QString, QString> installed_drivers;
+#endif
 
     QByteArray add_packet_header(QByteArray output);
     int write_j2534_data(QByteArray output);
@@ -194,6 +201,11 @@ private:
     /*public slots:
     QStringList check_serial_ports();
     QString open_serial_port();*/
+
+#if defined(_WIN32) || defined(WIN32) || defined (_WIN64) || defined (WIN64)
+    QMap<QString, QString> getAllJ2534DriversNames();
+#endif
+    QStringList check_j2534_devices(QMap<QString, QString> installed_drivers);
 
 private slots:
 

@@ -25,6 +25,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->lineEdit_broker_port->setText( QString::number(peerPort) );
     ui->lineEdit_broker_port->setValidator( new QIntValidator(1, 65535, this) );
     ui->plainTextEdit_logs->setReadOnly(true);
+
     update_ui();
     //statusBar()->addWidget(progress_bar);
     QObject::connect(startup, &Startup::log, this, &MainWindow::log);

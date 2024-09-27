@@ -82,6 +82,8 @@ public:
     QString get_can_speed() override ;
     bool    set_can_speed(QString value) override ;
 
+    uint8_t get_serial_port_parity(void) override ;
+    bool set_serial_port_parity(uint8_t parity) override ;
     QString get_serial_port_baudrate() override ;
     bool    set_serial_port_baudrate(QString value) override ;
     QString get_serial_port_linux() override ;
