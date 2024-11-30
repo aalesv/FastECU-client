@@ -20,8 +20,6 @@ signals:
     void signal_set_progressbar_value(int value);
 
 private:
-    QPlainTextEdit *logWindow;
-    QProgressBar *progressBar;
 };
 
 #endif
