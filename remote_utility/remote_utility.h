@@ -14,6 +14,7 @@ public:
 
     bool send_log_window_message(QString message) override;
     bool set_progressbar_value(int value) override;
+    QString ping(QString message) override;
 
 signals:
     void signal_send_log_window_message(QString message);

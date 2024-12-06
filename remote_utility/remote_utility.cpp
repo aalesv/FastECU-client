@@ -24,3 +24,10 @@ bool RemoteUtility::set_progressbar_value(int value)
     emit signal_set_progressbar_value(value);
     return true;
 }
+
+QString RemoteUtility::ping(QString message)
+{
+    //qDebug() << Q_FUNC_INFO << message;
+    QString r = "pong";
+    return r;
+}
