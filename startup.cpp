@@ -19,6 +19,8 @@ Startup::Startup(QString peerAddress,
     , node_utility(new QRemoteObjectHost(webSocket))
     , serial(new SerialPortActions(this))
     , utility(new RemoteUtility(this))
+    , heartbeatIntervalSerial(0)
+    , heartbeatIntervalUtility(0)
 {
     QObject::connect(webSocket, &QWebSocket::textMessageReceived, this,
                      [&](QString message)

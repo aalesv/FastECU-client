@@ -21,8 +21,9 @@ public:
     const QString nodeUrlUtility = "FastECU_Utility_node_url";
     const QString remoteObjectNameSerial = "FastECU";
     const QString remoteObjectNameUtility = "FastECU_Utility";
-    const int heartbeatIntervalSerial = 1000;
-    const int heartbeatIntervalUtility = heartbeatIntervalSerial * 5;
+    //Inited in constructor initializer list
+    const int heartbeatIntervalSerial;
+    const int heartbeatIntervalUtility;
 
 public slots:
     void start();
