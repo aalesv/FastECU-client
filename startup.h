@@ -32,6 +32,7 @@ public slots:
     QString getPeerAddress();
 
 signals:
+    void disconnected();
     void log(QString message);
     void set_progressbar_value(int value);
 

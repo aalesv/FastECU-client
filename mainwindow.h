@@ -36,6 +36,7 @@ private slots:
     void on_lineEdit_broker_port_textChanged(const QString &arg1);
     void update_ui(void);
     void set_progressbar_value(int value);
+    void disconnected();
 
 private:
     Ui::MainWindow *ui;

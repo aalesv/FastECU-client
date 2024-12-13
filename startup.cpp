@@ -47,6 +47,7 @@ Startup::Startup(QString peerAddress,
                         QWebSocketProtocol::CloseCode code = this->webSocket->closeCode();
                         QString reason = this->webSocket->closeReason();
                         qDebug() << "webSocket disconnected: " << code << reason;
+                        emit disconnected();
                         emit log("Disconnected from "+this->peerAddress+" "+QString::number(code)+" "+reason);
                      });
     QObject::connect(utility, &RemoteUtility::signal_send_log_window_message,

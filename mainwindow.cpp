@@ -31,6 +31,8 @@ MainWindow::MainWindow(QWidget *parent)
     QObject::connect(startup, &Startup::log, this, &MainWindow::log);
     QObject::connect(startup, &Startup::set_progressbar_value,
                      this, &MainWindow::set_progressbar_value);
+    QObject::connect(startup, &Startup::disconnected,
+                     this, &MainWindow::disconnected);
 }
 
 MainWindow::~MainWindow()
@@ -59,11 +61,9 @@ void MainWindow::on_pushButton_connect_released()
 
 void MainWindow::on_pushButton_disconnect_released()
 {
-    connectionStarted = false;
-    update_ui();
     log("Closing connection to "+peerAddress+":"+QString::number(peerPort));
     startup->stop();
-    set_progressbar_value(0);
+    //Then disconnect signal must be emitted and processed
 }
 
 void MainWindow::on_lineEdit_broker_address_textChanged(const QString &arg1)
@@ -93,4 +93,11 @@ void MainWindow::aboutToQuit()
     QTime dieTime= QTime::currentTime().addSecs(5);
     while (QTime::currentTime() < dieTime)
         QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+}
+
+void MainWindow::disconnected()
+{
+    connectionStarted = false;
+    update_ui();
+    set_progressbar_value(0);
 }
