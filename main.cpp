@@ -8,6 +8,31 @@
 
 int main(int argc, char *argv[])
 {
+    bool debug_console = false;
+
+    for (int i = 0; i < argc; i++)
+    {
+        if (!strcmp(argv[i], "debug"))
+            debug_console = true;
+    }
+
+#ifdef _WIN32
+    if (!debug_console)
+    {
+        if (AttachConsole(ATTACH_PARENT_PROCESS)) {
+            freopen("CONOUT$", "w", stdout);
+            freopen("CONOUT$", "w", stderr);
+        }
+    }
+    else
+    {
+        if (AttachConsole(ATTACH_PARENT_PROCESS) || AllocConsole()) {
+            freopen("CONOUT$", "w", stdout);
+            freopen("CONOUT$", "w", stderr);
+        }
+    }
+#endif
+
     QApplication a(argc, argv);
     MainWindow w;
     w.show();
