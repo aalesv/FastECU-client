@@ -93,6 +93,14 @@ void Startup::stop()
 
 void Startup::startOverNetwok()
 {
+    bool ssl_is_supported = QSslSocket::supportsSsl();
+    if (! ssl_is_supported)
+    {
+        qDebug() << "ERROR: SSL is NOT supported!";
+        emit log("ERROR: SSL libaries not found! No further work possible. "
+                 "Fix the error and restart the application.");
+    }
+
     qDebug() << "Starting network connection";
     QSslConfiguration sslConfiguration;
     sslConfiguration.setPeerVerifyMode(QSslSocket::VerifyNone);
