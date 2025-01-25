@@ -16,11 +16,14 @@ public:
     explicit Startup(QString peerAddress,
                      QObject *parent = nullptr);
     ~Startup();
+    const QString webSocketPasswordHeader = "fastecu-basic-password";
     const QString autodiscoveryMessage = "FastECU_PTP_Autodiscovery";
     const QString nodeUrlSerial = "FastECU_node_url";
     const QString nodeUrlUtility = "FastECU_Utility_node_url";
     const QString remoteObjectNameSerial = "FastECU";
     const QString remoteObjectNameUtility = "FastECU_Utility";
+    const QString wssSerialPath = "/" + remoteObjectNameSerial;
+    const QString wssUtilityPath = "/" + remoteObjectNameUtility;
     //Inited in constructor initializer list
     const int heartbeatIntervalSerial;
     const int heartbeatIntervalUtility;
@@ -30,6 +33,9 @@ public slots:
     void stop();
     void setPeerAddress(QString address);
     QString getPeerAddress();
+    void setHostName(QString host);
+    void setPortNumber(int port);
+    void setPassword(QString pw);
 
 signals:
     void disconnected();
@@ -38,7 +44,11 @@ signals:
 
 private:
     QString peerAddress;
-    QWebSocket *webSocket;
+    QString hostName;
+    int portNumber;
+    QString password;
+    QWebSocket *webSocketSerial;
+    QWebSocket *webSocketUtility;
     WebSocketIoDevice *socket_serial;
     WebSocketIoDevice *socket_utility;
     QRemoteObjectHost *node_serial;

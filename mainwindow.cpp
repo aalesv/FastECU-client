@@ -56,6 +56,8 @@ void MainWindow::on_pushButton_connect_released()
     qDebug() << "Connecting to " << peer;
     log("Connecting to " + peer);
     startup->setPeerAddress(peer);
+    startup->setHostName(peerAddress);
+    startup->setPortNumber(peerPort);
     startup->start();
 }
 
