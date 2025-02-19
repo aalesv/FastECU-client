@@ -113,7 +113,7 @@ int SerialPortActionsDirect::fast_init(QByteArray output)
         {
             /* Send init data */
             received = write_serial_data_echo_check(output);
-            received.append(read_serial_data(1, 10));
+            received.append(read_serial_data(10));
             qDebug() << parse_message_to_hex(received);
             delay(100);
         }
@@ -132,7 +132,7 @@ int SerialPortActionsDirect::fast_init(QByteArray output)
         accurate_delay(23.8);
         // Send init data
         received = write_serial_data_echo_check(output);
-        received = read_serial_data(1, 10);
+        received = read_serial_data(10);
         //qDebug() << "Fast init response: " + parse_message_to_hex(received);
         delay(100);
     }
@@ -563,7 +563,7 @@ void SerialPortActionsDirect::close_j2534_serial_port()
     j2534->setDllName(dllName);
 }
 
-QByteArray SerialPortActionsDirect::read_serial_data(uint32_t datalen, uint16_t timeout)
+QByteArray SerialPortActionsDirect::read_serial_data(uint16_t timeout)
 {
     QByteArray received;
     QByteArray req_bytes;
