@@ -106,6 +106,7 @@ public:
 
     void reset_connection();
 
+    QByteArray set_error();
     QByteArray read_serial_data(uint16_t timeout);
     QByteArray write_serial_data(QByteArray output);
     QByteArray write_serial_data_echo_check(QByteArray output);
@@ -118,6 +119,8 @@ public:
 
     QStringList check_serial_ports();
     QString open_serial_port();
+
+    unsigned long read_batt_voltage();
 
 private:
 #ifndef ARRAYSIZE
