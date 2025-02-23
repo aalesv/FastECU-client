@@ -985,14 +985,19 @@ long J2534::PassThruIoctl(unsigned long ChannelID, unsigned long IoctlID, const 
     }
     if (IoctlID == READ_VBATT)
     {
-        long* vBatt = (long*)pOutput;
+        unsigned long *vBatt = (unsigned long*)pOutput;
         long pin = 16;
         output.clear();
         QString str = "atr " + QString::number((int)pin) + "\r\n";
+        output.append(str.toUtf8());
         write_serial_data(output);
-        delay(50);
-        received = read_serial_data(100, 50);
-        qDebug() << "Pin 16 voltage =" << received << parseMessageToHex(received);
+        qDebug() << "Sent: " + parseMessageToHex(output);
+        received = read_serial_data(14, 100);
+        qDebug() << "Response: " + parseMessageToHex(received);
+        QString response = QString(received).split(" ").at(QString(received).split(" ").length()-1);
+        response = response.split("\r\n").at(0);
+        qDebug() << "Pin 16 voltage: " + response + " mV";
+        *vBatt = response.toULong();
     }
 
     if (IoctlID == FAST_INIT)
@@ -1004,11 +1009,10 @@ long J2534::PassThruIoctl(unsigned long ChannelID, unsigned long IoctlID, const 
         output.append(str.toUtf8());
         for (i = 0; i < msg->DataSize; i++)
         {
-            //qDebug() << "Value:" << hex << msg->Data[i];
             output.append(msg->Data[i]);
         }
         write_serial_data(output);
-        received = read_serial_data(100, 50);
+        qDebug() << "Sent: " + parseMessageToHex(output);
     }
 
     if (input_as_sa)

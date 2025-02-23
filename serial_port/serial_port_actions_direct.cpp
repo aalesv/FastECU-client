@@ -109,14 +109,6 @@ int SerialPortActionsDirect::fast_init(QByteArray output)
             reportJ2534Error();
             return STATUS_ERROR;
         }
-        else
-        {
-            /* Send init data */
-            received = write_serial_data_echo_check(output);
-            received.append(read_serial_data(10));
-            qDebug() << parse_message_to_hex(received);
-            delay(100);
-        }
     }
     else
     {
@@ -926,23 +918,27 @@ int SerialPortActionsDirect::set_j2534_ioctl(unsigned long parameter, int value)
     return STATUS_SUCCESS;
 }
 
-unsigned long SerialPortActionsDirect::read_batt_voltage()
+unsigned long SerialPortActionsDirect::read_vbatt()
 {
     if (use_openport2_adapter)
     {
-        SCONFIG vBatt;
+        unsigned long vBatt;
 
         if (j2534->PassThruIoctl(chanID,READ_VBATT,NULL,&vBatt))
         {
             reportJ2534Error();
             return STATUS_ERROR;
         }
-        //emit LOG_D("Batt: " + QString::number(vBatt.Value / 1000.0) + " V", true, true);
+        qDebug() << "Batt: " + QString::number(vBatt / 1000.0) + " V";
 
-        return vBatt.Value;
+        return vBatt;
+
     }
     else
+    {
         qDebug() << "Adapter does not support reading voltage";
+        return STATUS_SUCCESS;
+    }
 
     return STATUS_SUCCESS;
 }

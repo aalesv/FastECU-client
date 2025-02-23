@@ -558,3 +558,9 @@ QString SerialPortActions::open_serial_port()
 {
     return serial_direct->open_serial_port();
 }
+
+unsigned long SerialPortActions::read_vbatt()
+{
+    qDebug() << "Read vBatt on remote";
+    return serial_direct->read_vbatt();
+}

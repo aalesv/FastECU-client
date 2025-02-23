@@ -130,8 +130,12 @@ public:
     QStringList check_serial_ports(void) override ;
     QString open_serial_port(void) override ;
 
+    unsigned long read_vbatt(void) override;
+
 private:
     SerialPortActionsDirect        *serial_direct;
+
+
 };
 
 #endif // SERIAL_PORT_ACTIONS_H
