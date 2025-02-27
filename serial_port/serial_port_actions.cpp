@@ -488,6 +488,16 @@ int SerialPortActions::change_port_speed(QString portSpeed)
     return serial_direct->change_port_speed(portSpeed);
 }
 
+int SerialPortActions::set_j2534_ioctl(unsigned long parameter, int value)
+{
+    return serial_direct->set_j2534_ioctl(parameter, value);
+}
+
+QByteArray SerialPortActions::five_baud_init(QByteArray output)
+{
+    return serial_direct->five_baud_init(output);
+}
+
 int SerialPortActions::fast_init(QByteArray output)
 {
     return serial_direct->fast_init(output);
@@ -561,6 +571,5 @@ QString SerialPortActions::open_serial_port()
 
 unsigned long SerialPortActions::read_vbatt()
 {
-    qDebug() << "Read vBatt on remote";
     return serial_direct->read_vbatt();
 }

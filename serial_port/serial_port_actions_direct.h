@@ -55,6 +55,7 @@ public:
 
     uint16_t echo_check_timout = 5000;
     uint16_t receive_timeout = 500;
+    uint16_t serial_read_timeout = 2000;
     uint16_t serial_read_extra_short_timeout = 50;
     uint16_t serial_read_short_timeout = 200;
     uint16_t serial_read_medium_timeout = 400;
@@ -97,8 +98,21 @@ public:
     uint32_t iso15765_source_address = 0;
     uint32_t iso15765_destination_address = 0;
 
+#define SERIAL_P1_MIN   0x00 // J2534 says this may not be changed
+#define SERIAL_P1_MAX   0x01
+#define SERIAL_P2_MIN   0x02 // J2534 says this may not be changed
+#define SERIAL_P2_MAX   0x03 // J2534 says this may not be changed
+#define SERIAL_P3_MIN   0x04
+#define SERIAL_P3_MAX   0x05 // J2534 says this may not be changed
+#define SERIAL_P4_MIN   0x06
+#define SERIAL_P4_MAX   0x07 // J2534 says this may not be changed
+
+    uint8_t _P1_MAX = 10;
+    bool     set_kline_timings(unsigned long parameter, int value);
+
     bool is_serial_port_open();
     int change_port_speed(QString portSpeed);
+    QByteArray five_baud_init(QByteArray output);
     int fast_init(QByteArray output);
     int set_lec_lines(int lec1, int lec2);
     int pulse_lec_1_line(int timeout);
@@ -107,6 +121,7 @@ public:
     void reset_connection();
 
     QByteArray set_error();
+    QByteArray read_serial_obd_data(uint16_t timeout);
     QByteArray read_serial_data(uint16_t timeout);
     QByteArray write_serial_data(QByteArray output);
     QByteArray write_serial_data_echo_check(QByteArray output);
@@ -121,6 +136,7 @@ public:
     QString open_serial_port();
 
     unsigned long read_vbatt();
+    int set_j2534_ioctl(unsigned long parameter, int value);
 
 private:
 #ifndef ARRAYSIZE
@@ -142,7 +158,6 @@ private:
     long PassThruGetLastError(char *pErrorDescription);
     long PassThruIoctl(unsigned long ChannelID, unsigned long IoctlID, const void *pInput, void *pOutput);
 
-    int set_j2534_ioctl(unsigned long parameter, int value);
     int init_j2534_connection();
     int set_j2534_can();
     int unset_j2534_can();

@@ -29,6 +29,12 @@ bool SerialPortActionsDirect::is_serial_port_open()
     return serial->isOpen();
 }
 
+bool SerialPortActionsDirect::set_kline_timings(unsigned long parameter, int value)
+{
+    _P1_MAX = value;
+    return STATUS_SUCCESS;
+}
+
 int SerialPortActionsDirect::change_port_speed(QString portSpeed)
 {
     serial_port_baudrate = portSpeed;
@@ -77,6 +83,79 @@ int SerialPortActionsDirect::change_port_speed(QString portSpeed)
     }
 
     return STATUS_ERROR;
+}
+
+QByteArray SerialPortActionsDirect::five_baud_init(QByteArray output)
+{
+    QByteArray response;
+
+    if (use_openport2_adapter)
+    {
+        unsigned long result;
+        SBYTE_ARRAY InputMsg;
+        SBYTE_ARRAY OutputMsg;
+
+        unsigned char BytePtr[20];
+
+        memset(&InputMsg, 0, sizeof(InputMsg));
+        memset(&OutputMsg, 0, sizeof(OutputMsg));
+
+        InputMsg.NumOfBytes = 1;
+        InputMsg.BytePtr = BytePtr;
+        OutputMsg.NumOfBytes = 0;
+        OutputMsg.BytePtr = BytePtr;
+
+        for (int i = 0; i < output.length(); i++)
+            BytePtr[i] = (uint8_t)output.at(i);
+
+        result = j2534->PassThruIoctl(chanID, FIVE_BAUD_INIT, &InputMsg, &OutputMsg);
+        if (result)
+        {
+            reportJ2534Error();
+            return response;
+        }
+        for (unsigned long i = 0; i < OutputMsg.NumOfBytes; i++)
+            response.append(OutputMsg.BytePtr[i]);
+    }
+    else
+    {
+        // Set timeout to 350ms before init
+        accurate_delay(350);
+        // Set break to set seril line low
+        serial->setBreakEnabled(true);
+        // Set timeout to 200ms to generate 200ms low pulse
+        accurate_delay(200);
+        // Unset break to set seril line high
+        serial->setBreakEnabled(false);
+        // Set timeout to 400ms to generate 400ms high pulse
+        accurate_delay(400);
+        serial->setBreakEnabled(true);
+        accurate_delay(400);
+        serial->setBreakEnabled(false);
+        accurate_delay(400);
+        serial->setBreakEnabled(true);
+        accurate_delay(400);
+        serial->setBreakEnabled(false);
+        accurate_delay(400);
+        // Set timeout to 400ms to generate 400ms high pulse before init data is sent
+
+        // Send init data
+        write_serial_data_echo_check(output);
+        response = read_serial_obd_data(40);
+        //emit LOG_D("Read response", true, true);
+        response = read_serial_obd_data(200);
+        //emit LOG_D("Five baud init response: " + parse_message_to_hex(response), true, true);
+        if ((uint8_t)response.at(1) == 0x08 && (uint8_t)response.at(2) == 0x08)
+        {
+            //delay(30);
+            output.clear();
+            output.append(~((uint8_t)response.at(2)));
+            write_serial_data_echo_check(output);
+            response.append(read_serial_obd_data(200));
+        }
+    }
+
+    return response;
 }
 
 int SerialPortActionsDirect::fast_init(QByteArray output)
@@ -570,6 +649,43 @@ QByteArray SerialPortActionsDirect::set_error()
     return received;
 }
 
+QByteArray SerialPortActionsDirect::read_serial_obd_data(uint16_t timeout)
+{
+    QByteArray received;
+
+    //emit LOG_D("Check bytes available", true, true);
+    QTime dieTime = QTime::currentTime().addMSecs(timeout);
+    while (!serial->bytesAvailable() && QTime::currentTime() < dieTime)
+    {
+        QCoreApplication::processEvents(QEventLoop::AllEvents, 1);
+    }
+    //emit LOG_D("Byte(s) available or timeout", true, true);
+    if (serial->bytesAvailable())
+    {
+        //emit LOG_D("Byte(s) available", true, true);
+        QTime intervalTime = QTime::currentTime().addMSecs(_P1_MAX);
+        while (QTime::currentTime() < dieTime)
+        {
+            if (serial->bytesAvailable())
+            {
+                //emit LOG_D("Byte available", true, true);
+                received.append(serial->read(1));
+                intervalTime = QTime::currentTime().addMSecs(_P1_MAX);
+            }
+            if (intervalTime < QTime::currentTime())
+            {
+                //emit LOG_D("Byte timeout", true, true);
+                break;
+            }
+            QCoreApplication::processEvents(QEventLoop::AllEvents, 1);
+        }
+        //if (QTime::currentTime() > dieTime)
+        //    emit LOG_D("Message timeout", true, true);
+    }
+
+    return received;
+}
+
 QByteArray SerialPortActionsDirect::read_serial_data(uint16_t timeout)
 {
     QByteArray received;
@@ -929,7 +1045,7 @@ unsigned long SerialPortActionsDirect::read_vbatt()
             reportJ2534Error();
             return STATUS_ERROR;
         }
-        qDebug() << "Batt: " + QString::number(vBatt / 1000.0) + " V";
+        //qDebug() << "Batt: " + QString::number(vBatt / 1000.0) + " V";
 
         return vBatt;
 
@@ -1133,10 +1249,13 @@ int SerialPortActionsDirect::unset_j2534_can()
 int SerialPortActionsDirect::set_j2534_can_timings()
 {
     // Set timeouts etc.
+    if (is_can_connection)
+        qDebug() << "Set CAN timings";
+    else if (is_iso15765_connection)
+        qDebug() << "Set iso15765 timings";
     SCONFIG_LIST scl;
-    SCONFIG scp[] = {{PARITY,0}, {LOOPBACK, 0}};
+    SCONFIG scp[] = {{LOOPBACK, 0}};
     scl.NumOfParams = ARRAYSIZE(scp);
-    scp[0].Value = NO_PARITY;
     scl.ConfigPtr = scp;
     if (j2534->PassThruIoctl(chanID,SET_CONFIG,&scl,NULL))
     {
@@ -1165,10 +1284,10 @@ int SerialPortActionsDirect::set_j2534_can_filters()
 
     if (protocol == CAN)
     {
-        //qDebug() << "Set CAN filters";
+        qDebug() << "Set CAN filters";
         txmsg.ProtocolID = protocol;
         txmsg.RxStatus = 0;
-        txmsg.TxFlags = ISO15765_FRAME_PAD;
+        txmsg.TxFlags = CAN_29BIT_ID;
         txmsg.Timestamp = 0;
         txmsg.DataSize = 4;
         txmsg.ExtraDataIndex = 0;
@@ -1190,6 +1309,7 @@ int SerialPortActionsDirect::set_j2534_can_filters()
     }
     else if (protocol == ISO15765)
     {
+        qDebug() << "Set iso15765 filters";
         txmsg.ProtocolID = protocol;
         txmsg.RxStatus = 0;
         txmsg.TxFlags = ISO15765_FRAME_PAD;
@@ -1215,7 +1335,6 @@ int SerialPortActionsDirect::set_j2534_can_filters()
             reportJ2534Error();
             return STATUS_ERROR;
         }
-        qDebug() << "msgId" << msgId;
     }
     else
         return STATUS_ERROR;
