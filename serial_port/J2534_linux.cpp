@@ -1016,6 +1016,8 @@ long J2534::PassThruIoctl(unsigned long ChannelID, unsigned long IoctlID, const 
         output.clear();
         QString str = "atr " + QString::number((int)pin) + "\r\n";
         output.append(str.toUtf8());
+        if (serial->bytesAvailable())
+            return result;
         write_serial_data(output);
         qDebug() << "Sent: " + parseMessageToHex(output);
         result = PassThruReadMsgs(ChannelID, &rxmsg, &numRxMsg, serial_read_timeout);
