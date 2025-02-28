@@ -108,7 +108,7 @@ public:
     uint32_t get_iso15765_destination_address() override ;
     bool     set_iso15765_destination_address(uint32_t value) override ;
 
-    int set_j2534_ioctl(unsigned long parameter, int value) override ;
+    int set_j2534_ioctl(uint32_t parameter, int value) override ;
 
     bool is_serial_port_open(void) override ;
     int change_port_speed(QString portSpeed) override ;

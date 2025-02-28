@@ -488,7 +488,7 @@ int SerialPortActions::change_port_speed(QString portSpeed)
     return serial_direct->change_port_speed(portSpeed);
 }
 
-int SerialPortActions::set_j2534_ioctl(unsigned long parameter, int value)
+int SerialPortActions::set_j2534_ioctl(uint32_t parameter, int value)
 {
     return serial_direct->set_j2534_ioctl(parameter, value);
 }
