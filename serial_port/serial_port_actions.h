@@ -20,6 +20,8 @@ public:
     bool get_setDataTerminalReady() override ;
     bool set_setDataTerminalReady(bool value) override ;
 
+    bool get_add_iso9141_header() override ;
+    bool set_add_iso9141_header(bool value) override ;
     bool get_add_iso14230_header() override ;
     bool set_add_iso14230_header(bool value) override ;
     bool get_is_iso14230_connection() override ;
@@ -42,6 +44,13 @@ public:
     bool set_dataTerminalEnabled(int value) override ;
     int  get_dataTerminalDisabled() override ;
     bool set_dataTerminalDisabled(int value) override ;
+
+    uint8_t get_iso9141_startbyte();
+    bool    set_iso9141_startbyte(uint8_t value);
+    uint8_t get_iso9141_tester_id();
+    bool    set_iso9141_tester_id(uint8_t value);
+    uint8_t get_iso9141_target_id();
+    bool    set_iso9141_target_id(uint8_t value);
 
     uint8_t get_iso14230_startbyte() override ;
     bool    set_iso14230_startbyte(uint8_t value) override ;

@@ -173,6 +173,12 @@ int SerialPortActionsDirect::fast_init(QByteArray output)
 
         InputMsg.ProtocolID = ISO14230;
         InputMsg.TxFlags = 0;
+
+        if (add_iso14230_header)
+            output = append_iso14230_header(output);
+        else if (add_iso9141_header)
+            output = append_iso9141_header(output);
+
         for (int i = 0; i < output.length(); i++)
         {
             InputMsg.Data[i] = output.at(i);
@@ -783,7 +789,9 @@ QByteArray SerialPortActionsDirect::write_serial_data(QByteArray output)
     if (is_serial_port_open())
     {
         if (add_iso14230_header)
-            output = add_packet_header(output);
+            output = append_iso14230_header(output);
+        else if (add_iso9141_header)
+            output = append_iso9141_header(output);
 
         if (use_openport2_adapter)
         {
@@ -815,7 +823,9 @@ QByteArray SerialPortActionsDirect::write_serial_data_echo_check(QByteArray outp
     if (is_serial_port_open())
     {
         if (add_iso14230_header)
-            output = add_packet_header(output);
+            output = append_iso14230_header(output);
+        else if (add_iso9141_header)
+            output = append_iso9141_header(output);
 
         if (use_openport2_adapter)
         {
@@ -855,12 +865,29 @@ QByteArray SerialPortActionsDirect::write_serial_data_echo_check(QByteArray outp
     return STATUS_SUCCESS;
 }
 
-QByteArray SerialPortActionsDirect::add_packet_header(QByteArray output)
+QByteArray SerialPortActionsDirect::append_iso9141_header(QByteArray output)
 {
     uint8_t chk_sum = 0;
     uint8_t msglength = output.length();
 
-    //qDebug() << "Adding iso14230 header to message";
+    output.insert(0, iso9141_startbyte);
+    output.insert(1, iso9141_target_id);
+    output.insert(2, iso9141_tester_id);
+    if (is_ssm_protocol)
+        output.insert(3, msglength);
+
+    for (int i = 0; i < output.length(); i++)
+        chk_sum = chk_sum + output.at(i);
+
+    output.append(chk_sum);
+
+    return output;
+}
+
+QByteArray SerialPortActionsDirect::append_iso14230_header(QByteArray output)
+{
+    uint8_t chk_sum = 0;
+    uint8_t msglength = output.length();
 
     output.insert(0, iso14230_startbyte);
     output.insert(1, iso14230_target_id);

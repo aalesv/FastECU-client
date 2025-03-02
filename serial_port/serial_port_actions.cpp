@@ -48,6 +48,17 @@ bool SerialPortActions::set_setDataTerminalReady(bool value)
     return true;
 }
 
+bool SerialPortActions::get_add_iso9141_header()
+{
+    return serial_direct->add_iso9141_header;
+}
+
+bool SerialPortActions::set_add_iso9141_header(bool value)
+{
+    serial_direct->add_iso9141_header = value;
+    return true;
+}
+
 bool SerialPortActions::get_add_iso14230_header()
 {
     return serial_direct->add_iso14230_header;
@@ -155,6 +166,39 @@ int SerialPortActions::get_dataTerminalDisabled()
 bool SerialPortActions::set_dataTerminalDisabled(int value)
 {
     serial_direct->dataTerminalDisabled = value;
+    return true;
+}
+
+uint8_t SerialPortActions::get_iso9141_startbyte(void)
+{
+    return serial_direct->iso9141_startbyte;
+}
+
+bool SerialPortActions::set_iso9141_startbyte(uint8_t value)
+{
+    serial_direct->iso9141_startbyte = value;
+    return true;
+}
+
+uint8_t SerialPortActions::get_iso9141_tester_id()
+{
+    return serial_direct->iso9141_tester_id;
+}
+
+bool SerialPortActions::set_iso9141_tester_id(uint8_t value)
+{
+    serial_direct->iso9141_tester_id = value;
+    return true;
+}
+
+uint8_t SerialPortActions::get_iso9141_target_id()
+{
+    return serial_direct->iso9141_target_id;
+}
+
+bool SerialPortActions::set_iso9141_target_id(uint8_t value)
+{
+    serial_direct->iso9141_target_id = value;
     return true;
 }
 
