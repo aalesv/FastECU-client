@@ -1052,7 +1052,7 @@ unsigned long SerialPortActionsDirect::read_vbatt()
     }
     else
     {
-        qDebug() << "Adapter does not support reading voltage";
+        //qDebug() << "Adapter does not support reading voltage";
         return STATUS_SUCCESS;
     }
 
