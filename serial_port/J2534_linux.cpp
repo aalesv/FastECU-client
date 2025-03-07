@@ -279,7 +279,7 @@ long J2534::PassThruReadMsgs(unsigned long ChannelID, PASSTHRU_MSG *pMsg, unsign
     //qDebug() << "Message block length:" << received.length() << "data:" << parseMessageToHex(received);
     while (received.length() > 0 && is_serial_port_open())
     {
-        //qDebug() << "RECEIVED:" << received << parseMessageToHex(received);
+        //qDebug() << "RECEIVED:" << parseMessageToHex(received);
 
         //qDebug() << "Message header" << received.at(0) << received.at(1) << received.at(2);
         if (received.at(0) == 0x61 && received.at(1) == 0x72)
@@ -547,7 +547,7 @@ long J2534::PassThruReadMsgs(unsigned long ChannelID, PASSTHRU_MSG *pMsg, unsign
             else
                 received.clear();
         }
-        //qDebug() << "Parsing read messages:" << received.length() << received << parseMessageToHex(received);
+        //qDebug() << "Parsing read messages:" << received.length() << parseMessageToHex(received);
     }
 
     *pNumMsgs = msg_cnt;

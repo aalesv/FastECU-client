@@ -48,6 +48,26 @@ bool SerialPortActions::set_setDataTerminalReady(bool value)
     return true;
 }
 
+bool SerialPortActions::get_add_ssm_header(void)
+{
+    return serial_direct->add_ssm_header;
+}
+bool SerialPortActions::set_add_ssm_header(bool value)
+{
+    serial_direct->add_ssm_header = value;
+    return true;
+}
+
+bool SerialPortActions::get_add_iso9141_header(void)
+{
+    return serial_direct->add_iso9141_header;
+}
+bool SerialPortActions::set_add_iso9141_header(bool value)
+{
+    serial_direct->add_iso9141_header = value;
+    return true;
+}
+
 bool SerialPortActions::get_add_iso14230_header()
 {
     return serial_direct->add_iso14230_header;
@@ -158,36 +178,31 @@ bool SerialPortActions::set_dataTerminalDisabled(int value)
     return true;
 }
 
-uint8_t SerialPortActions::get_iso14230_startbyte()
+uint8_t SerialPortActions::get_kline_startbyte(void)
 {
-    return serial_direct->iso14230_startbyte;
+    return serial_direct->kline_startbyte;
 }
-
-bool SerialPortActions::set_iso14230_startbyte(uint8_t value)
+bool SerialPortActions::set_kline_startbyte(uint8_t value)
 {
-    serial_direct->iso14230_startbyte = value;
+    serial_direct->kline_startbyte = value;
     return true;
 }
-
-uint8_t SerialPortActions::get_iso14230_tester_id()
+uint8_t SerialPortActions::get_kline_tester_id(void)
 {
-    return serial_direct->iso14230_tester_id;
+    return serial_direct->kline_tester_id;
 }
-
-bool SerialPortActions::set_iso14230_tester_id(uint8_t value)
+bool SerialPortActions::set_kline_tester_id(uint8_t value)
 {
-    serial_direct->iso14230_tester_id = value;
+    serial_direct->kline_tester_id = value;
     return true;
 }
-
-uint8_t SerialPortActions::get_iso14230_target_id()
+uint8_t SerialPortActions::get_kline_target_id(void)
 {
-    return serial_direct->iso14230_target_id;
+    return serial_direct->kline_target_id;
 }
-
-bool SerialPortActions::set_iso14230_target_id(uint8_t value)
+bool SerialPortActions::set_kline_target_id(uint8_t value)
 {
-    serial_direct->iso14230_target_id = value;
+    serial_direct->kline_target_id = value;
     return true;
 }
 

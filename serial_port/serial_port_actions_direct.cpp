@@ -142,9 +142,9 @@ QByteArray SerialPortActionsDirect::five_baud_init(QByteArray output)
         // Send init data
         write_serial_data_echo_check(output);
         response = read_serial_obd_data(40);
-        //emit LOG_D("Read response", true, true);
+        //qDebug() << "Read response";
         response = read_serial_obd_data(200);
-        //emit LOG_D("Five baud init response: " + parse_message_to_hex(response), true, true);
+        //qDebug() << "Five baud init response: " + parse_message_to_hex(response), true, true);
         if ((uint8_t)response.at(1) == 0x08 && (uint8_t)response.at(2) == 0x08)
         {
             //delay(30);
@@ -553,14 +553,14 @@ QString SerialPortActionsDirect::open_serial_port()
             }
             else
             {
-                //sendLogWindowMessage("Couldn't open serial port '" + serialPort + "'", true, true);
+                //sendLogWindowMessage("Couldn't open serial port '" + serialPort + "'";
                 qDebug() << "Couldn't open serial port '" + serial_port + "'";
                 return NULL;
             }
 
         }
         else{
-            //sendLogWindowMessage("Serial port '" + serialPort + "' is already opened", true, true);
+            //sendLogWindowMessage("Serial port '" + serialPort + "' is already opened";
             qDebug() << "Serial port '" + serial_port + "' is already opened";
             return openedSerialPort;
         }
@@ -653,34 +653,34 @@ QByteArray SerialPortActionsDirect::read_serial_obd_data(uint16_t timeout)
 {
     QByteArray received;
 
-    //emit LOG_D("Check bytes available", true, true);
+    //qDebug() << "Check bytes available";
     QTime dieTime = QTime::currentTime().addMSecs(timeout);
     while (!serial->bytesAvailable() && QTime::currentTime() < dieTime)
     {
         QCoreApplication::processEvents(QEventLoop::AllEvents, 1);
     }
-    //emit LOG_D("Byte(s) available or timeout", true, true);
+    //qDebug() << "Byte(s) available or timeout";
     if (serial->bytesAvailable())
     {
-        //emit LOG_D("Byte(s) available", true, true);
+        //qDebug() << "Byte(s) available";
         QTime intervalTime = QTime::currentTime().addMSecs(_P1_MAX);
         while (QTime::currentTime() < dieTime)
         {
             if (serial->bytesAvailable())
             {
-                //emit LOG_D("Byte available", true, true);
+                //qDebug() << "Byte available";
                 received.append(serial->read(1));
                 intervalTime = QTime::currentTime().addMSecs(_P1_MAX);
             }
             if (intervalTime < QTime::currentTime())
             {
-                //emit LOG_D("Byte timeout", true, true);
+                //qDebug() << "Byte timeout";
                 break;
             }
             QCoreApplication::processEvents(QEventLoop::AllEvents, 1);
         }
         //if (QTime::currentTime() > dieTime)
-        //    emit LOG_D("Message timeout", true, true);
+        //    qDebug() << "Message timeout";
     }
 
     return received;
@@ -727,7 +727,7 @@ QByteArray SerialPortActionsDirect::read_serial_data(uint16_t timeout)
                 }
                 QCoreApplication::processEvents(QEventLoop::AllEvents, 1);
             }
-            //qDebug() << "1. Response (header): " + parse_message_to_hex(received);
+            //qDebug() << "1. Response (header): " + parse_message_to_hex(received), true, true);
             if (is_iso14230_connection)
             {
                 //qDebug() << "Read with ISO14230";
@@ -752,7 +752,7 @@ QByteArray SerialPortActionsDirect::read_serial_data(uint16_t timeout)
                     req_bytes.append(serial->read(1));
                 QCoreApplication::processEvents(QEventLoop::AllEvents, 1);
             }
-            //qDebug() << "2. Response (payload): " + parse_message_to_hex(req_bytes);
+            //qDebug() << "2. Response (payload): " + parse_message_to_hex(req_bytes), true, true);
         }
         if (!received.length())
         {
@@ -762,11 +762,11 @@ QByteArray SerialPortActionsDirect::read_serial_data(uint16_t timeout)
         {
             received.insert(0, set_error());
             received.append(req_bytes);
-            //qDebug() << "Message too short: " + parse_message_to_hex(received);
+            //qDebug() << "Message too short: " + parse_message_to_hex(received), true, true);
             return received;
         }
         received.append(req_bytes);
-        //qDebug() << "3. Response (full): " + parse_message_to_hex(received);
+        //qDebug() << "3. Response (full): " + parse_message_to_hex(received), true, true);
 
         return received;
     }
@@ -782,8 +782,12 @@ QByteArray SerialPortActionsDirect::write_serial_data(QByteArray output)
 
     if (is_serial_port_open())
     {
-        if (add_iso14230_header)
-            output = add_packet_header(output);
+        if (add_ssm_header)
+            output = append_ssm_header(output);
+        else if (add_iso9141_header)
+            output = append_iso9141_header(output);
+        else if (add_iso14230_header)
+            output = append_iso14230_header(output);
 
         if (use_openport2_adapter)
         {
@@ -814,8 +818,12 @@ QByteArray SerialPortActionsDirect::write_serial_data_echo_check(QByteArray outp
 
     if (is_serial_port_open())
     {
-        if (add_iso14230_header)
-            output = add_packet_header(output);
+        if (add_ssm_header)
+            output = append_ssm_header(output);
+        else if (add_iso9141_header)
+            output = append_iso9141_header(output);
+        else if (add_iso14230_header)
+            output = append_iso14230_header(output);
 
         if (use_openport2_adapter)
         {
@@ -826,7 +834,6 @@ QByteArray SerialPortActionsDirect::write_serial_data_echo_check(QByteArray outp
         while (serial->bytesAvailable())
             received.append(serial->readAll());
 
-        //qDebug() << "Send msg: " + parse_message_to_hex(output.mid(0,10));
         received.clear();
         for (int i = 0; i < output.length(); i++)
         {
@@ -846,8 +853,8 @@ QByteArray SerialPortActionsDirect::write_serial_data_echo_check(QByteArray outp
             }
             QCoreApplication::processEvents(QEventLoop::AllEvents, 1);
         }
-        //if (received.length() < output.length())
-        //    qDebug() << "Write serial data echo read failed!";
+        if (received.length() < output.length())
+            qDebug() << "Write serial data echo read failed!";
 
         received.clear();
         return STATUS_SUCCESS;
@@ -855,16 +862,55 @@ QByteArray SerialPortActionsDirect::write_serial_data_echo_check(QByteArray outp
     return STATUS_SUCCESS;
 }
 
-QByteArray SerialPortActionsDirect::add_packet_header(QByteArray output)
+QByteArray SerialPortActionsDirect::append_ssm_header(QByteArray output)
+{
+    uint8_t chk_sum = 0;
+    uint8_t msglength = output.length();
+
+    output.insert(0, kline_startbyte);
+    output.insert(1, kline_target_id);
+    output.insert(2, kline_tester_id);
+    output.insert(3, msglength);
+
+    for (int i = 0; i < output.length(); i++)
+        chk_sum = chk_sum + output.at(i);
+
+    output.append(chk_sum);
+
+    //qDebug() << "Generated iso9141 message: " + parse_message_to_hex(output), true, true);
+
+    return output;
+}
+
+QByteArray SerialPortActionsDirect::append_iso9141_header(QByteArray output)
+{
+    uint8_t chk_sum = 0;
+    uint8_t msglength = output.length();
+
+    output.insert(0, kline_startbyte);
+    output.insert(1, kline_target_id);
+    output.insert(2, kline_tester_id);
+
+    for (int i = 0; i < output.length(); i++)
+        chk_sum = chk_sum + output.at(i);
+
+    output.append(chk_sum);
+
+    //qDebug() << "Generated iso9141 message: " + parse_message_to_hex(output);
+
+    return output;
+}
+
+QByteArray SerialPortActionsDirect::append_iso14230_header(QByteArray output)
 {
     uint8_t chk_sum = 0;
     uint8_t msglength = output.length();
 
     //qDebug() << "Adding iso14230 header to message";
 
-    output.insert(0, iso14230_startbyte);
-    output.insert(1, iso14230_target_id);
-    output.insert(2, iso14230_tester_id);
+    output.insert(0, kline_startbyte);
+    output.insert(1, kline_target_id);
+    output.insert(2, kline_tester_id);
     if (msglength < 0x40)
         output[0] = output[0] | msglength;
     else
@@ -874,6 +920,8 @@ QByteArray SerialPortActionsDirect::add_packet_header(QByteArray output)
         chk_sum = chk_sum + output.at(i);
 
     output.append(chk_sum);
+
+    //qDebug() << "Generated iso14230 message: " + parse_message_to_hex(output), true, true);
 
     return output;
 }
