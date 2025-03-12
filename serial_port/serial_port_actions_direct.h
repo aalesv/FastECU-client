@@ -50,6 +50,8 @@ public:
 
     bool use_openport2_adapter = false;
 
+    unsigned long vBatt = 0;
+
     int requestToSendEnabled = 0;
     int requestToSendDisabled = 1;
     int dataTerminalEnabled = 0;
@@ -139,6 +141,8 @@ public:
 
     unsigned long read_vbatt();
     int set_j2534_ioctl(unsigned long parameter, int value);
+
+    bool get_is_tx_done();
 
 private:
 #ifndef ARRAYSIZE

@@ -36,20 +36,17 @@ QString J2534::open_serial_port(QString serial_port)
                 qRegisterMetaType<QSerialPort::SerialPortError>();
                 connect(serial, SIGNAL(errorOccurred(QSerialPort::SerialPortError)), this, SLOT(handle_error(QSerialPort::SerialPortError)));
 
-                //send_log_window_message("Serial port '" + serialPort + "' is open at baudrate " + serialPortBaudRate, true, true);
                 qDebug() << "Linux j2534 serial port '" + serial_port + "' is open at baudrate " + serial_port_baudrate;
                 return opened_serial_port;
             }
             else
             {
-                //SendLogWindowMessage("Couldn't open serial port '" + serialPort + "'", true, true);
                 qDebug() << "Couldn't open Linux j2534 serial port '" + serial_port + "'";
                 return NULL;
             }
 
         }
         else{
-            //SendLogWindowMessage("Serial port '" + serialPort + "' is already opened", true, true);
             qDebug() << "Linux j2534 serial port '" + serial_port + "' is already opened";
             return opened_serial_port;
         }
@@ -139,11 +136,16 @@ QByteArray J2534::write_serial_iso14230_data(QByteArray output)
     return output;
 }
 
+bool J2534::get_is_tx_done()
+{
+    return is_tx_done;
+}
+
 QString J2534::parseMessageToHex(QByteArray received)
 {
     QByteArray msg;
 
-    for (unsigned long i = 0; i < received.length(); i++)
+    for (int i = 0; i < received.length(); i++)
     {
         msg.append(QString("%1 ").arg((uint8_t)received.at(i),2,16,QLatin1Char('0')).toUtf8());
     }
@@ -421,6 +423,7 @@ long J2534::PassThruReadMsgs(unsigned long ChannelID, PASSTHRU_MSG *pMsg, unsign
                     msg_cnt = 0;
                     //qDebug() << "TX_DONE_MSG" << parseMessageToHex(received);
                     received.clear();
+                    is_tx_done = true;
                 }
                 if (msg_type == TX_LB_START_IND)
                 {
@@ -576,6 +579,7 @@ long J2534::PassThruWriteMsgs(unsigned long ChannelID, const PASSTHRU_MSG *pMsg,
         write_serial_data(output);
         //PassThruReadMsgs(ChannelID, &rxmsg, &numRxMsg, Timeout);
         pMsg++;
+        is_tx_done = false;
     }
 
     return result;

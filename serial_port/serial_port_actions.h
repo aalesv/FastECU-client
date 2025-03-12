@@ -121,9 +121,11 @@ public:
     int set_lec_lines(int lec1, int lec2) override ;
     int pulse_lec_1_line(int timeout) override ;
     int pulse_lec_2_line(int timeout) override ;
+    bool get_is_tx_done() override;
 
     bool reset_connection(void) override ;
 
+    QByteArray read_serial_obd_data(uint16_t timeout) override;
     QByteArray read_serial_data(uint16_t timeout) override ;
     QByteArray write_serial_data(QByteArray output) override ;
     QByteArray write_serial_data_echo_check(QByteArray output) override ;

@@ -72,6 +72,7 @@ int SerialPortActionsDirect::change_port_speed(QString portSpeed)
             if (!j2534->PassThruIoctl(chanID,SET_CONFIG,&scl,NULL))
             {
                 qDebug() << "Baudrate set to" << baudrate << "OK";
+                delay(50);
                 return STATUS_SUCCESS;
             }
             else
@@ -653,36 +654,44 @@ QByteArray SerialPortActionsDirect::read_serial_obd_data(uint16_t timeout)
 {
     QByteArray received;
 
-    //qDebug() << "Check bytes available";
-    QTime dieTime = QTime::currentTime().addMSecs(timeout);
-    while (!serial->bytesAvailable() && QTime::currentTime() < dieTime)
+    if (is_serial_port_open())
     {
-        QCoreApplication::processEvents(QEventLoop::AllEvents, 1);
-    }
-    //qDebug() << "Byte(s) available or timeout";
-    if (serial->bytesAvailable())
-    {
-        //qDebug() << "Byte(s) available";
-        QTime intervalTime = QTime::currentTime().addMSecs(_P1_MAX);
-        while (QTime::currentTime() < dieTime)
+        if (use_openport2_adapter)
         {
-            if (serial->bytesAvailable())
-            {
-                //qDebug() << "Byte available";
-                received.append(serial->read(1));
-                intervalTime = QTime::currentTime().addMSecs(_P1_MAX);
-            }
-            if (intervalTime < QTime::currentTime())
-            {
-                //qDebug() << "Byte timeout";
-                break;
-            }
+            received = read_j2534_data(timeout);
+            return received;
+        }
+
+        //qDebug() << "Check bytes available";
+        QTime dieTime = QTime::currentTime().addMSecs(timeout);
+        while (!serial->bytesAvailable() && QTime::currentTime() < dieTime)
+        {
             QCoreApplication::processEvents(QEventLoop::AllEvents, 1);
         }
-        //if (QTime::currentTime() > dieTime)
-        //    qDebug() << "Message timeout";
+        //qDebug() << "Byte(s) available or timeout";
+        if (serial->bytesAvailable())
+        {
+            //qDebug() << "Byte(s) available";
+            QTime intervalTime = QTime::currentTime().addMSecs(_P1_MAX);
+            while (QTime::currentTime() < dieTime)
+            {
+                if (serial->bytesAvailable())
+                {
+                    //qDebug() << "Byte available";
+                    received.append(serial->read(1));
+                    intervalTime = QTime::currentTime().addMSecs(_P1_MAX);
+                }
+                if (intervalTime < QTime::currentTime())
+                {
+                    //qDebug() << "Byte timeout";
+                    break;
+                }
+                QCoreApplication::processEvents(QEventLoop::AllEvents, 1);
+            }
+            //if (QTime::currentTime() > dieTime)
+            //    qDebug() << "Message timeout";
+        }
     }
-
     return received;
 }
 
@@ -1020,6 +1029,11 @@ int SerialPortActionsDirect::stop_periodic_j2534_data()
     return STATUS_SUCCESS;
 }
 
+bool SerialPortActionsDirect::get_is_tx_done()
+{
+    return j2534->get_is_tx_done();
+}
+
 QByteArray SerialPortActionsDirect::read_j2534_data(unsigned long timeout)
 {
     PASSTHRU_MSG rxmsg;
@@ -1086,8 +1100,6 @@ unsigned long SerialPortActionsDirect::read_vbatt()
 {
     if (use_openport2_adapter)
     {
-        unsigned long vBatt;
-
         if (j2534->PassThruIoctl(chanID,READ_VBATT,NULL,&vBatt))
         {
             reportJ2534Error();

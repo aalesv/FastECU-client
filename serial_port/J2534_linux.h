@@ -56,6 +56,7 @@ public:
     QByteArray write_serial_iso14230_data(QByteArray output);
     QString parseMessageToHex(QByteArray received);
     uint32_t parse_ts(const char *data);
+    bool get_is_tx_done();
 
 private:
     bool debugMode;
@@ -73,6 +74,9 @@ private:
 
     QSerialPort *serial = new QSerialPort();
     unsigned long periodic_msg_id;
+
+    bool msg_ack = false;
+    bool is_tx_done = false;
 
     enum rx_msg_type {
         NORM_MSG,

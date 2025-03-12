@@ -539,6 +539,11 @@ bool SerialPortActions::reset_connection()
     return true;
 }
 
+QByteArray SerialPortActions::read_serial_obd_data(uint16_t timeout)
+{
+    return serial_direct->read_serial_obd_data(timeout);
+}
+
 QByteArray SerialPortActions::read_serial_data(uint16_t timeout)
 {
     return serial_direct->read_serial_data(timeout);
@@ -552,6 +557,11 @@ QByteArray SerialPortActions::write_serial_data(QByteArray output)
 QByteArray SerialPortActions::write_serial_data_echo_check(QByteArray output)
 {
     return serial_direct->write_serial_data_echo_check(output);
+}
+
+bool SerialPortActions::get_is_tx_done()
+{
+    return serial_direct->get_is_tx_done();
 }
 
 int SerialPortActions::clear_rx_buffer()
