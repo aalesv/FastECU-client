@@ -561,7 +561,6 @@ long J2534::PassThruReadMsgs(unsigned long ChannelID, PASSTHRU_MSG *pMsg, unsign
 long J2534::PassThruWriteMsgs(unsigned long ChannelID, const PASSTHRU_MSG *pMsg, unsigned long *pNumMsgs, unsigned long Timeout)
 {
     QByteArray output;
-    QByteArray received;
     long result = STATUS_NOERROR;
 
     //qDebug() << "Send" << *pNumMsgs << "messages";
