@@ -537,27 +537,7 @@ int SerialPortActions::pulse_lec_2_line(int timeout)
 {
     return serial_direct->pulse_lec_2_line(timeout);
 }
-/*
-bool SerialPortActions::get_is_comm_busy()
-{
-    return is_comm_busy;
-}
 
-void SerialPortActions::set_comm_busy(bool value)
-{
-    is_comm_busy = value;
-}
-
-bool SerialPortActions::get_read_vbatt()
-{
-    return is_read_vbatt;
-}
-
-void SerialPortActions::set_read_vbatt(bool value)
-{
-    is_read_vbatt = value;
-}
-*/
 bool SerialPortActions::reset_connection()
 {
     serial_direct->reset_connection();

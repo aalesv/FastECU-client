@@ -46,12 +46,7 @@ public:
     bool set_dataTerminalEnabled(int value) override ;
     int  get_dataTerminalDisabled() override ;
     bool set_dataTerminalDisabled(int value) override ;
-/*
-    bool get_is_comm_busy() override ;
-    void set_comm_busy(bool value) override ;
-    bool get_read_vbatt() override ;
-    void set_read_vbatt(bool value) override ;
-*/
+
     uint8_t get_kline_startbyte() override ;
     bool    set_kline_startbyte(uint8_t value) override ;
     uint8_t get_kline_tester_id() override ;
