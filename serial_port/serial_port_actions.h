@@ -20,10 +20,10 @@ public:
     bool get_setDataTerminalReady() override ;
     bool set_setDataTerminalReady(bool value) override ;
 
-    bool get_add_ssm_header();
-    bool set_add_ssm_header(bool value);
-    bool get_add_iso9141_header();
-    bool set_add_iso9141_header(bool value);
+    bool get_add_ssm_header() override ;
+    bool set_add_ssm_header(bool value) override ;
+    bool get_add_iso9141_header() override ;
+    bool set_add_iso9141_header(bool value) override ;
     bool get_add_iso14230_header() override ;
     bool set_add_iso14230_header(bool value) override ;
     bool get_is_iso14230_connection() override ;
@@ -46,7 +46,12 @@ public:
     bool set_dataTerminalEnabled(int value) override ;
     int  get_dataTerminalDisabled() override ;
     bool set_dataTerminalDisabled(int value) override ;
-
+/*
+    bool get_is_comm_busy() override ;
+    void set_comm_busy(bool value) override ;
+    bool get_read_vbatt() override ;
+    void set_read_vbatt(bool value) override ;
+*/
     uint8_t get_kline_startbyte() override ;
     bool    set_kline_startbyte(uint8_t value) override ;
     uint8_t get_kline_tester_id() override ;
@@ -87,7 +92,7 @@ public:
     bool    set_can_speed(QString value) override ;
 
     uint8_t get_serial_port_parity(void) override ;
-    bool set_serial_port_parity(uint8_t parity) override ;
+    bool    set_serial_port_parity(uint8_t parity) override ;
     QString get_serial_port_baudrate() override ;
     bool    set_serial_port_baudrate(QString value) override ;
     QString get_serial_port_linux() override ;
@@ -111,6 +116,8 @@ public:
     bool     set_iso15765_source_address(uint32_t value) override ;
     uint32_t get_iso15765_destination_address() override ;
     bool     set_iso15765_destination_address(uint32_t value) override ;
+
+    bool     set_kline_timings(uint32_t parameter, int value) override ;
 
     int set_j2534_ioctl(uint32_t parameter, int value) override ;
 
@@ -144,6 +151,9 @@ public:
 private:
     SerialPortActionsDirect        *serial_direct;
 
+    QAtomicInteger<bool> is_read_vbatt = false;
+    QAtomicInteger<bool> is_comm_busy = false;
+    unsigned long vBatt = 0;
 
 };
 

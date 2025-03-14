@@ -29,7 +29,7 @@ bool SerialPortActionsDirect::is_serial_port_open()
     return serial->isOpen();
 }
 
-bool SerialPortActionsDirect::set_kline_timings(unsigned long parameter, int value)
+bool SerialPortActionsDirect::set_kline_timings(uint32_t parameter, int value)
 {
     _P1_MAX = value;
     return STATUS_SUCCESS;
@@ -1655,7 +1655,7 @@ QString SerialPortActionsDirect::parse_message_to_hex(QByteArray received)
 {
     QByteArray msg;
 
-    for (unsigned long i = 0; i < received.length(); i++)
+    for (int i = 0; i < received.length(); i++)
     {
         msg.append(QString("%1 ").arg((uint8_t)received.at(i),2,16,QLatin1Char('0')).toUtf8());
     }

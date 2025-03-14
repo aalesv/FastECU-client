@@ -112,7 +112,7 @@ public:
 #define SERIAL_P4_MAX   0x07 // J2534 says this may not be changed
 
     uint8_t _P1_MAX = 10;
-    bool     set_kline_timings(unsigned long parameter, int value);
+    bool set_kline_timings(uint32_t parameter, int value);
 
     bool is_serial_port_open();
     int change_port_speed(QString portSpeed);
@@ -173,6 +173,7 @@ private:
     int set_j2534_iso9141();
     int set_j2534_iso9141_filters();
     int set_j2534_iso9141_timings();
+
     unsigned long msgID = 0;
 
     enum rx_msg_type {
