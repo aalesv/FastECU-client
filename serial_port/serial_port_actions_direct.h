@@ -173,6 +173,7 @@ private:
     int init_j2534_connection();
     int set_j2534_can();
     int unset_j2534_can();
+    unsigned long can_id_flag();
     int set_j2534_can_filters();
     //    int set_j2534_stmin_tx();
     int set_j2534_can_timings();
