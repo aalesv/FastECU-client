@@ -143,10 +143,6 @@ public:
 
     unsigned long read_vbatt(void) override;
 
-signals:
-    void LOG_TO_SERVER(QString message, bool timestamp, bool linefeed);
-    void SET_PROGRESSBAR_BY_CLIENT(int value);
-
 private:
     SerialPortActionsDirect        *serial_direct;
 
