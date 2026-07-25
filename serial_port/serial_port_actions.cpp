@@ -8,6 +8,10 @@ SerialPortActions::SerialPortActions(QObject *parent)
     : SerialPortActionsRemoteSimpleSource{parent}
 {
     serial_direct = new SerialPortActionsDirect(this);
+    QObject::connect(serial_direct, &SerialPortActionsDirect::LOG_E, this, &SerialPortActions::debug_print);
+    QObject::connect(serial_direct, &SerialPortActionsDirect::LOG_W, this, &SerialPortActions::debug_print);
+    QObject::connect(serial_direct, &SerialPortActionsDirect::LOG_I, this, &SerialPortActions::debug_print);
+    QObject::connect(serial_direct, &SerialPortActionsDirect::LOG_D, this, &SerialPortActions::debug_print);
 }
 
 SerialPortActions::~SerialPortActions()
@@ -602,4 +606,9 @@ QString SerialPortActions::open_serial_port()
 unsigned long SerialPortActions::read_vbatt()
 {
     return serial_direct->read_vbatt();
+}
+
+void SerialPortActions::debug_print(QString message, bool timestamp, bool linefeed)
+{
+    qDebug() << message;
 }

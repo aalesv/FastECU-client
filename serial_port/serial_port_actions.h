@@ -150,6 +150,8 @@ private:
     QAtomicInteger<bool> is_comm_busy = false;
     unsigned long vBatt = 0;
 
+private slots:
+    void debug_print(QString message, bool timestamp, bool linefeed);
 };
 
 #endif // SERIAL_PORT_ACTIONS_H
