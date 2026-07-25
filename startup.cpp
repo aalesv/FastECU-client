@@ -89,8 +89,6 @@ Startup::Startup(QString peerAddress,
                      utility, &RemoteUtility::LOG_I);
     QObject::connect(serial, &SerialPortActions::SET_PROGRESSBAR_BY_CLIENT,
                      utility, &RemoteUtility::SET_PROGRESSBAR_BY_CLIENT);
-    QObject::connect(serial, &SerialPortActions::SET_PROGRESSBAR_BY_CLIENT,
-                     this, &Startup::set_progressbar_value);
 }
 
 Startup::~Startup()
